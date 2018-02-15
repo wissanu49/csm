@@ -31,7 +31,7 @@ $this->title = "ใบรับฝากสินค้า";
                 <?php foreach ($depModel as $dep) { ?>
                     <tr>
                         <td style="text-align: left; width: 60%;">
-                            <h6><strong>ลูกค้า :</strong> <?= $dep->customers->fullname ?> </h6>
+                            <h5><strong>ลูกค้า :</strong> <?= $dep->customers->fullname ?> </h5>
                         </td>
                         <td style="text-align: left;">
                             <h6><strong>วันที่ :</strong> <?= Yii::$app->formatter->asDate($dep->deposit_date) ?></h6>
@@ -48,7 +48,7 @@ $this->title = "ใบรับฝากสินค้า";
                 <tr style="text-align: center;">
                     <td style="text-align: center;"><h6><strong>#</strong></h6></td>
                     <td ><h6><strong>รายการ</strong></h6></td>
-                    <td ><h6><strong>ราคา</strong></h6></td>
+                    <th style=""><h6><strong>ราคา</strong></h6></th>
                     <td style="text-align: center;"><h6><strong>จำนวน</strong></h6></td>
                 </tr>
                 <?php
@@ -73,7 +73,7 @@ $this->title = "ใบรับฝากสินค้า";
             </table>
         </td>
     </tr>
-     <tr>
+    <tr>
         <td colspan="2">&nbsp;<br></td>
     </tr>
     <tr>

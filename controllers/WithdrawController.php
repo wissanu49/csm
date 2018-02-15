@@ -32,10 +32,10 @@ class WithdrawController extends Controller {
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['create', 'index', 'update', 'delete', 'bill' , 'additem', 'addcarts', 'removeitem', 'savedata', 'printpdf', 'checkout'],
+                'only' => ['create', 'index', 'update', 'delete', 'bill' , 'additem', 'addcarts', 'removeitem', 'savedata', 'printpdf', 'printpdfa4', 'checkout'],
                 'rules' => [
                     [
-                        'actions' => ['index', 'create', 'update', 'delete', 'bill', 'additem', 'addcarts', 'removeitem', 'savedata', 'printpdf', 'checkout'],
+                        'actions' => ['index', 'create', 'update', 'delete', 'bill', 'additem', 'addcarts', 'removeitem', 'savedata', 'printpdf', 'printpdfa4', 'checkout'],
                         'allow' => true,
                         'roles' => ['@'],
                     ]
@@ -322,8 +322,57 @@ class WithdrawController extends Controller {
                     // A4 paper format
                     //'format' => Pdf::FORMAT_A4,
                     'format' => [80,100],
-                    'marginLeft' => 2,
-                    'marginRight' => 2,
+                    'marginLeft' => 5,
+                    'marginRight' => 5,
+                    'marginTop' => 5,
+                    'marginBottom' => 5,
+                    'marginHeader' => 5,
+                    'marginFooter' => 5,
+                    // portrait orientation
+                    'orientation' => Pdf::ORIENT_PORTRAIT,
+                    // stream to browser inline
+                    'destination' => Pdf::DEST_BROWSER,
+                    // your html content input
+                    'content' => $content,
+                    
+                    // format content from your own css file if needed or use the
+                    // enhanced bootstrap css built by Krajee for mPDF formatting 
+                    'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
+                    // any css to be embedded if required
+                    'cssInline' => '.kv-heading-1{font-size:18px}',
+                    // set mPDF properties on the fly
+                    'options' => [
+                        'title' => 'Billing',
+                        ],
+                    // call mPDF methods on the fly
+                    'methods' => [
+                        'SetHeader' => false,
+                        'SetFooter' => false,
+                    ]
+                ]);
+                $pdf->getApi()->SetJS('this.print();');
+                
+                return $pdf->render();
+    }
+    
+    public function actionPrintpdfa4($id, $depid){
+        
+        $dataProvider = Withdraw::find()->where(['withdraw_id'=>$id])->all();
+        $depModel = Deposits::find()->where(['id'=>$depid])->all();
+        $content = $this->renderPartial('printpdfA4',[
+            'id' => $id,
+            'depModel' => $depModel,
+            'dataProvider' => $dataProvider,
+            ]);
+
+                $pdf = new Pdf([
+                    // set to use core fonts only
+                    'mode' => Pdf::MODE_UTF8, //
+                    // A4 paper format
+                    //'format' => Pdf::FORMAT_A4,
+                    'format' => [210,148.5],
+                    'marginLeft' => 5,
+                    'marginRight' => 5,
                     'marginTop' => 5,
                     'marginBottom' => 5,
                     'marginHeader' => 5,
