@@ -73,7 +73,9 @@ Modal::end();
                                     'label' => '',
                                     'format' => 'raw',
                                     'value' => function ($data) {
-                                        return Html::a(' พิมพ์ Slip ', ['deposits/printpdf', 'id' => $data->id], ['target' => '_blank', 'class' => 'btn btn-info fa fa-print'])." ".Html::a(' พิมพ์ A4', ['deposits/printpdfa4', 'id' => $data->id], ['target' => '_blank', 'class' => 'btn btn-info fa fa-print']);
+                                        return Html::a(' พิมพ์ Slip ', ['deposits/printpdf', 'id' => $data->id], ['target' => '_blank', 'class' => 'btn btn-danger fa fa-print'])." "
+                                                . "".Html::a(' พิมพ์ A4', ['deposits/printpdfa4', 'id' => $data->id], ['target' => '_blank', 'class' => 'btn btn-info fa fa-print'])." "
+                                                . "".Html::a(' พิมพ์ Dot Matrix', ['deposits/printpdfdot', 'id' => $data->id], ['target' => '_blank', 'class' => 'btn btn-success fa fa-print']);
                                     }
                                 ],
                             ],

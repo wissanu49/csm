@@ -31,10 +31,10 @@ class DepositsController extends Controller {
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['create', 'index', 'update', 'delete', 'view', 'viewpdf', 'printpdf', 'printpdfa4'],
+                'only' => ['create', 'index', 'update', 'delete', 'view', 'viewpdf', 'printpdf', 'printpdfa4', 'printpdfdot'],
                 'rules' => [
                     [
-                        'actions' => ['index', 'create', 'update', 'delete', 'view', 'viewpdf', 'printpdf', 'printpdfa4'],
+                        'actions' => ['index', 'create', 'update', 'delete', 'view', 'viewpdf', 'printpdf', 'printpdfa4', 'printpdfdot'],
                         'allow' => true,
                         'roles' => ['@'],
                     ]
@@ -183,6 +183,54 @@ class DepositsController extends Controller {
                     'marginLeft' => 5,
                     'marginRight' => 5,
                     'marginTop' => 5,
+                    'marginBottom' => 5,
+                    'marginHeader' => 5,
+                    'marginFooter' => 5,
+                    // portrait orientation
+                    'orientation' => Pdf::ORIENT_PORTRAIT,
+                    // stream to browser inline
+                    'destination' => Pdf::DEST_BROWSER,
+                    // your html content input
+                    'content' => $content,
+                    // format content from your own css file if needed or use the
+                    // enhanced bootstrap css built by Krajee for mPDF formatting 
+                    'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
+                    //'cssFile' => '@web/css/pdf.css',
+                    // any css to be embedded if required
+                    'cssInline' => '.kv-heading-1{font-size:18px}',
+                    // set mPDF properties on the fly
+                    'options' => ['title' => 'Billing'],
+                    // call mPDF methods on the fly
+                    'methods' => [
+                        'SetHeader' => false,
+                        'SetFooter' => false,
+                    ]
+                ]);
+                
+                $pdf->getApi()->SetJS('this.print();');
+
+                return $pdf->render();
+    }
+    
+    public function actionPrintpdfdot($id){
+        
+        $dataProvider = SubDeposits::find()->where(['deposits_id'=>$id])->all();
+        $depModel = Deposits::find()->where(['id'=>$id])->all();
+        $content = $this->renderPartial('printpdfDot',[
+            'id' => $id,
+            'depModel' => $depModel,
+            'dataProvider' => $dataProvider,
+            ]);
+
+                $pdf = new Pdf([
+                    // set to use core fonts only
+                    'mode' => Pdf::MODE_UTF8, //
+                    // A4 paper format
+                    //'format' => Pdf::FORMAT_A4,
+                    'format' => [205,140],
+                    'marginLeft' => 5,
+                    'marginRight' => 5,
+                    'marginTop' => 2,
                     'marginBottom' => 5,
                     'marginHeader' => 5,
                     'marginFooter' => 5,

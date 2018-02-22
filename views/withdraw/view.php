@@ -74,10 +74,12 @@ $NumToString = new Numbertostring();
                 if ($status == 'false') {
                     ?>
                     &nbsp;
-                    <?= Html::a(' พิมพ์ Slip ', ['withdraw/printpdf', 'id' => $id, 'depid' => $depid], ['target' => '_blank', 'class' => 'btn btn-info fa fa-print']) ?>
+                    <?= Html::a(' พิมพ์ Slip ', ['withdraw/printpdf', 'id' => $id, 'depid' => $depid], ['target' => '_blank', 'class' => 'btn btn-danger fa fa-print']) ?>
                     &nbsp;
                     <?= Html::a(' พิมพ์ A4 ', ['withdraw/printpdfa4', 'id' => $id, 'depid' => $depid], ['target' => '_blank', 'class' => 'btn btn-info fa fa-print']) ?>
-                    <?php
+                    &nbsp;
+                    <?= Html::a(' พิมพ์ Dot Matrix', ['withdraw/printpdfdot', 'id' => $id, 'depid' => $depid], ['target' => '_blank', 'class' => 'btn btn-success fa fa-print']) ?>
+                        <?php
                 }
             }
             ?>
