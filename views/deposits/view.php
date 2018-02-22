@@ -51,14 +51,14 @@ Modal::end();
                                     'value' => $model->customers->fullname,
                                 ],
                                 'deposit_date:date',
-                                 [
+                                [
                                     'attribute' => 'status',
-                                    'value' => function ($data){
-                                        if($data->status == 'remain'){
+                                    'value' => function ($data) {
+                                        if ($data->status == 'remain') {
                                             return 'คงเหลือ';
-                                        }elseif($data->status == 'closed'){
+                                        } elseif ($data->status == 'closed') {
                                             return 'ปิด';
-                                        }elseif($data->status == 'void'){
+                                        } elseif ($data->status == 'void') {
                                             return 'Void';
                                         }
                                     }
@@ -68,8 +68,16 @@ Modal::end();
                                     'value' => $model->users->fullname,
                                 ],
                                 'comment',
+                                [
+                                    'attribute' => '',
+                                    'label' => '',
+                                    'format' => 'raw',
+                                    'value' => function ($data) {
+                                        return Html::a(' พิมพ์ Slip ', ['deposits/printpdf', 'id' => $data->id], ['target' => '_blank', 'class' => 'btn btn-info fa fa-print'])." ".Html::a(' พิมพ์ A4', ['deposits/printpdfa4', 'id' => $data->id], ['target' => '_blank', 'class' => 'btn btn-info fa fa-print']);
+                                    }
+                                ],
                             ],
-                        ])
+                        ]);
                         ?>
                     </div>
                 </div>
