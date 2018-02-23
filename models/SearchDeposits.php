@@ -18,8 +18,8 @@ class SearchDeposits extends Deposits
     public function rules()
     {
         return [
-            [['id', 'customers_id', 'users_id'], 'integer'],
-            [['status'], 'string'],
+            [['customers_id', 'users_id'], 'integer'],
+            [['id','status'], 'string'],
             [['deposit_date', 'comment'], 'safe'],
         ];
     }
@@ -60,12 +60,14 @@ class SearchDeposits extends Deposits
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
+            //'id' => $this->id,
             'customers_id' => $this->customers_id,
             'deposit_date' => $this->deposit_date,
             'users_id' => $this->users_id,
             'status' => $this->status,
         ]);
+        
+        $query->andFilterWhere(['like', 'id', $this->id]);
 
         $query->andFilterWhere(['like', 'comment', $this->comment]);
 

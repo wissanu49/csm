@@ -40,7 +40,7 @@ $this->title = "ใบรับฝากสินค้า";
 
     <tr>
         <td colspan="2">
-            <table class="table" style="width:100%; font-size:10px;" >
+            <table class="table" style="width:80%; font-size:10px;" >
                 <tr style="text-align: center;">
                     <td style="text-align: center;"><strong>#</strong></td>
                     <td ><strong>รายการ</strong></td>

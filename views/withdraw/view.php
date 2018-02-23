@@ -70,7 +70,7 @@ $NumToString = new Numbertostring();
         <div style="text-align: center;">
             <?= Html::a(' ย้อนกลับ ', Yii::$app->request->referrer, ['class' => 'btn btn-warning fa fa-arrow-left']) ?>
             <?php
-            if (Yii::$app->user->identity->role == "Admin") {
+            //if (Yii::$app->user->identity->role == "Admin") {
                 if ($status == 'false') {
                     ?>
                     &nbsp;
@@ -81,7 +81,7 @@ $NumToString = new Numbertostring();
                     <?= Html::a(' พิมพ์ Dot Matrix', ['withdraw/printpdfdot', 'id' => $id, 'depid' => $depid], ['target' => '_blank', 'class' => 'btn btn-success fa fa-print']) ?>
                         <?php
                 }
-            }
+            //}
             ?>
         </div>
     </div>

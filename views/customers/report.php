@@ -108,7 +108,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     foreach ($withdraw as $with) {
                         ?>
                         <tr>
-                            <td><?= $with['withdraw_id'] ?></td>
+                            <td><?= $with['withdraw_id'] ?> </td>
                             <td><?= $with['name'] ?></td>                
                             <td><?= $with['amount'] ?></td>
                         </tr>
@@ -133,14 +133,16 @@ $this->params['breadcrumbs'][] = $this->title;
                             <th>เลขเอกสาร</th>
                             <th>สินค้า</th>
                             <th>คงเหลือ</th>
+                            <th></th>
                         </tr>
                         <?php
                         foreach ($remain as $rem) {
                             ?>
                             <tr>
-                                <td><?= $rem['deposits_id'] ?></td>
+                                <td><?= $rem['deposits_id'] ?> </td>
                                 <td><?= $rem['name'] ?></td>
                                 <td><?= $rem['balance'] ?></td>
+                                <td><?=  Html::a(' เบิก', ['deposits/view', 'id' => $rem['deposits_id']], ['class' => 'btn btn-success fa fa-edit']); ?></td>
                             </tr>
                         <?php } ?>
                     </table>
