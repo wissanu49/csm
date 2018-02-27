@@ -143,17 +143,19 @@ class WithdrawController extends Controller {
                 //$save = $model->save();
 
                 if ($model->save()) {
-                    $subdep = new withdraw();
+                    //$subdep = new withdraw();
                     $subdep = SubDeposits::find()->select(['id', 'balance'])->where(['products_id' => $carts['proid'], 'deposits_id' => $carts['depid']])->one();
                     $subdep->id = Withdraw::find()->count('[[id]]');
                     $subdep->id = $subdep->id + 1;
 
                     $balance = $subdep->balance - $model->amount;
-                    $subdep = Yii::$app->db->createCommand()->update('sub_deposits', ['balance' => $balance], ['products_id' => $carts['proid'], 'deposits_id' => $carts['depid']])->execute();
+                    // update balance
+                    //$up_balance = Yii::$app->db->createCommand()->update('sub_deposits', ['balance' => $balance], ['products_id' => $carts['proid'], 'deposits_id' => $carts['depid']])->execute();
+                    Yii::$app->db->createCommand()->update('sub_deposits', ['balance' => $balance], ['products_id' => $carts['proid'], 'deposits_id' => $carts['depid']])->execute();
 
-                    if (!$subdep) {
-                        $flag = $flag + 1;
-                    }
+                    //if (!$up_balance) {
+                    //    $flag = $flag + 1;
+                    //}
                     
                 } else {
                     $flag = $flag + 1;
@@ -167,7 +169,7 @@ class WithdrawController extends Controller {
                 
                 //die(var_dump($chkBalance));
                 // if balance = 0
-                if($chkBalance->balance == 0){
+                if($chkBalance->balance === 0){
                      // Update status to closed
                     Yii::$app->db->createCommand()->update('deposits', ['status' => 'closed'], [ 'id' => $model->deposits_id])->execute();
                 }

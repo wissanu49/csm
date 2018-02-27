@@ -97,7 +97,7 @@ foreach ($infos as $info) {
                                     <?= Html::a(' หน้าหลัก ', Yii::$app->homeUrl, ['class' => 'btn btn-warning fa fa-home']) ?>&nbsp;
                                     <?= Html::a(' พิมพ์ Slip ', ['deposits/printpdf', 'id' => $id], ['target' => '_blank', 'class' => 'btn btn-warning fa fa-print']) ?>&nbsp;
                                     <?= Html::a(' พิมพ์ A4', ['deposits/printpdfa4', 'id' => $id], ['target' => '_blank', 'class' => 'btn btn-info fa fa-print']) ?>&nbsp;
-                                    <?= Html::a(' พิมพ์ Dot Matrix', ['deposits/printpdfa4', 'id' => $id], ['target' => '_blank', 'class' => 'btn btn-success fa fa-print']) ?>
+                                    <?= Html::a(' พิมพ์ Dot Matrix', ['deposits/printpdfdot', 'id' => $id], ['target' => '_blank', 'class' => 'btn btn-success fa fa-print']) ?>
                                 </div>
                             </td>
                         </tr>

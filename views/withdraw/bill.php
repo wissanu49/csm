@@ -16,13 +16,13 @@ p2m\assets\MorrisAsset::register($this);
  */
 $NumToString = new Numbertostring();
 /*
-$infos = app\models\Info::find()->all();
-foreach ($infos as $info) {
-    $company = $info->company_name;
-    $address = $info->address;
-    $phone = $info->phone;
-    $logo = $info->logo;
-}
+  $infos = app\models\Info::find()->all();
+  foreach ($infos as $info) {
+  $company = $info->company_name;
+  $address = $info->address;
+  $phone = $info->phone;
+  $logo = $info->logo;
+  }
  * 
  */
 ?>
@@ -36,11 +36,11 @@ foreach ($infos as $info) {
             <div class="panel-body">
                 <div class="table-responsive">
                     <table class="table">
-                         <tr>
-                             <td colspan="3" style="text-align: center;">
-                                 <h3><strong>LYMRR</strong></h3>
+                        <tr>
+                            <td colspan="3" style="text-align: center;">
+                                <h3><strong>LYMRR</strong></h3>
                             </td>
-                         </tr>
+                        </tr>
                         <tr>
                             <td style="width: 60%">
                             </td>
@@ -127,7 +127,11 @@ foreach ($infos as $info) {
                             <td colspan="2" style="text-align: center;">
                                 <div>
                                     <?= Html::a(' หน้าหลัก ', Yii::$app->homeUrl, ['class' => 'btn btn-warning fa fa-home']) ?>&nbsp;
-                                    <?= Html::a(' พิมพ์ ', ['withdraw/printpdf', 'id' => $billid, 'depid' => $depid], ['target' => '_blank', 'class' => 'btn btn-info fa fa-print']) ?>
+                                    <?= Html::a(' พิมพ์ Slip', ['withdraw/printpdf', 'id' => $billid, 'depid' => $depid], ['target' => '_blank', 'class' => 'btn btn-danger fa fa-print']) ?>
+                                    &nbsp;
+                                    <?= Html::a(' พิมพ์ A4 ', ['withdraw/printpdfa4', 'id' => $billid, 'depid' => $depid], ['target' => '_blank', 'class' => 'btn btn-info fa fa-print']) ?>
+                                    &nbsp;
+                                    <?= Html::a(' พิมพ์ Dot Matrix', ['withdraw/printpdfdot', 'id' => $billid, 'depid' => $depid], ['target' => '_blank', 'class' => 'btn btn-success fa fa-print']) ?>
                                 </div>
                             </td>
                         </tr>
