@@ -100,4 +100,6 @@ class Deposits extends \yii\db\ActiveRecord
             return TRUE;
         }
     }
+    
+     
 }

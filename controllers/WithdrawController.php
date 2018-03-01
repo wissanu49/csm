@@ -32,10 +32,10 @@ class WithdrawController extends Controller {
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['create', 'index', 'update', 'delete', 'bill' , 'additem', 'addcarts', 'removeitem', 'savedata', 'printpdf', 'printpdfa4', 'printpdfdot', 'checkout'],
+                'only' => ['create', 'index', 'update', 'delete', 'bill', 'additem', 'addcarts', 'removeitem', 'savedata', 'printpdf', 'printpdfa4', 'printpdfdot', 'checkout'],
                 'rules' => [
                     [
-                        'actions' => ['index', 'create', 'update', 'delete', 'bill', 'additem', 'addcarts', 'removeitem', 'savedata', 'printpdf', 'printpdfa4','printpdfdot', 'checkout'],
+                        'actions' => ['index', 'create', 'update', 'delete', 'bill', 'additem', 'addcarts', 'removeitem', 'savedata', 'printpdf', 'printpdfa4', 'printpdfdot', 'checkout'],
                         'allow' => true,
                         'roles' => ['@'],
                     ]
@@ -56,7 +56,7 @@ class WithdrawController extends Controller {
      */
     public function actionIndex() {
         $searchModel = new SearchWithdraw();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);        
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
                     'searchModel' => $searchModel,
@@ -71,7 +71,7 @@ class WithdrawController extends Controller {
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionView($id) {
-        
+
         $withdraw = \app\models\Withdraw::find()->select('withdraw_id')->where(['id' => $id])->one();
         $dataProvider = \app\models\Withdraw::find()->where(['withdraw_id' => $withdraw->withdraw_id])->all();
         return $this->render('view', [
@@ -107,7 +107,7 @@ class WithdrawController extends Controller {
         }
     }
 
-    public function actionSavedata() {        
+    public function actionSavedata() {
         $date = date('Y-m-d');
         $transection = Yii::$app->db->beginTransaction();
         $runningcodes = self::RunningCodes($this->FIELD_NAME, $this->TABLE_NAME, $this->KEY_RUN);
@@ -115,9 +115,9 @@ class WithdrawController extends Controller {
         $flag = 0;
         try {
             foreach ($_SESSION['items'] as $key => $carts) {
-                
+
                 //$deposit = $carts['depid'];
-                
+
                 $model = new Withdraw();
                 $model->id = Withdraw::find()->count('[[id]]');
                 $model->date_withdraw = $date;
@@ -138,7 +138,7 @@ class WithdrawController extends Controller {
                 $model->deposits_id = $carts['depid'];
                 $model->products_id = $carts['proid'];
                 $model->amount = $carts['amount'];
-                
+
                 $depId = $model->deposits_id;
                 //$save = $model->save();
 
@@ -156,39 +156,46 @@ class WithdrawController extends Controller {
                     //if (!$up_balance) {
                     //    $flag = $flag + 1;
                     //}
-                    
                 } else {
                     $flag = $flag + 1;
                 }
             }
+            // check total balance
+            $chkBalance = SubDeposits::find()->select('SUM(balance) as balance')->where(['deposits_id' => $model->deposits_id])->one();
 
-            if ($flag == 0) {                
-                
-                // check total balance
-                $chkBalance = SubDeposits::find()->select('SUM(balance) AS balance')->where(['deposits_id'=>$model->deposits_id])->one();
-                
-                //die(var_dump($chkBalance));
-                // if balance = 0
-                if($chkBalance->balance === 0){
-                     // Update status to closed
-                    Yii::$app->db->createCommand()->update('deposits', ['status' => 'closed'], [ 'id' => $model->deposits_id])->execute();
+            //die(var_dump($chkBalance));
+            // if balance = 0
+            //$dep_status = "";
+            if ($chkBalance->balance === 0) {
+
+                //$depModel = new Deposits();
+                $dep_status = DepositsController::closedStatus($model->deposits_id);
+                if ($dep_status === false) {
+                    $flag = $flag + 1;
                 }
-                
+                // Update status to closed
+                //Yii::$app->db->createCommand()->update('deposits', ['status' => 'closed'], ['id' => $model->deposits_id])->execute();
+            }
+
+            if ($flag == 0) {
+
                 $transection->commit();
                 Yii::$app->session->setFlash('success', 'บันทึกข้อมูลเรียบร้อย');
                 unset(Yii::$app->session['items']);
-                
-                $this->redirect(['bill', 'billid'=> $runningcodes, 'depid'=>$depId]);
+                $this->redirect(['bill', 'billid' => $runningcodes, 'depid' => $depId]);
             } else {
                 $transection->rollBack();
                 Yii::$app->session->setFlash('error', 'เกิดข้อผิดพลาด');
-                $this->redirect(['deposits/view', 'id'=>$deposit]);
+                $this->redirect(['deposits/view', 'id' => $depId]);
+                unset(Yii::$app->session['items']);
             }
 
-            
+
+
             //$this->redirect(['deposits/index']);
         } catch (Exception $ex) {
-            
+            Yii::$app->session->setFlash('error', 'เกิดข้อผิดพลาด');
+            $this->redirect(['deposits/view', 'id' => $depId]);
         }
     }
 
@@ -295,164 +302,160 @@ class WithdrawController extends Controller {
                     'model' => $model,
         ]);
     }
-    
-    public function actionBill($billid, $depid){        
-        
-        $dataProvider = Withdraw::find()->where(['withdraw_id'=>$billid])->all();
-        $depModel = Deposits::find()->where(['id'=>$depid])->all();
-        return $this->render('bill',[
-            'billid' => $billid,
-            'depModel' => $depModel,
-            'dataProvider' => $dataProvider,
-            ]);
-                
+
+    public function actionBill($billid, $depid) {
+
+        $dataProvider = Withdraw::find()->where(['withdraw_id' => $billid])->all();
+        $depModel = Deposits::find()->where(['id' => $depid])->all();
+        return $this->render('bill', [
+                    'billid' => $billid,
+                    'depModel' => $depModel,
+                    'dataProvider' => $dataProvider,
+        ]);
     }
-    
-    public function actionPrintpdf($id, $depid){
-        
-        $dataProvider = Withdraw::find()->where(['withdraw_id'=>$id])->all();
-        $depModel = Deposits::find()->where(['id'=>$depid])->all();
-        $content = $this->renderPartial('printpdf',[
+
+    public function actionPrintpdf($id, $depid) {
+
+        $dataProvider = Withdraw::find()->where(['withdraw_id' => $id])->all();
+        $depModel = Deposits::find()->where(['id' => $depid])->all();
+        $content = $this->renderPartial('printpdf', [
             'id' => $id,
             'depModel' => $depModel,
             'dataProvider' => $dataProvider,
-            ]);
+        ]);
 
-                $pdf = new Pdf([
-                    // set to use core fonts only
-                    'mode' => Pdf::MODE_UTF8, //
-                    // A4 paper format
-                    //'format' => Pdf::FORMAT_A4,
-                    'format' => [80,100],
-                    'marginLeft' => 5,
-                    'marginRight' => 5,
-                    'marginTop' => 5,
-                    'marginBottom' => 5,
-                    'marginHeader' => 5,
-                    'marginFooter' => 5,
-                    // portrait orientation
-                    'orientation' => Pdf::ORIENT_PORTRAIT,
-                    // stream to browser inline
-                    'destination' => Pdf::DEST_BROWSER,
-                    // your html content input
-                    'content' => $content,
-                    
-                    // format content from your own css file if needed or use the
-                    // enhanced bootstrap css built by Krajee for mPDF formatting 
-                    'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
-                    // any css to be embedded if required
-                    'cssInline' => '.kv-heading-1{font-size:18px}',
-                    // set mPDF properties on the fly
-                    'options' => [
-                        'title' => 'Billing',
-                        ],
-                    // call mPDF methods on the fly
-                    'methods' => [
-                        'SetHeader' => false,
-                        'SetFooter' => false,
-                    ]
-                ]);
-                $pdf->getApi()->SetJS('this.print();');
-                
-                return $pdf->render();
+        $pdf = new Pdf([
+            // set to use core fonts only
+            'mode' => Pdf::MODE_UTF8, //
+            // A4 paper format
+            //'format' => Pdf::FORMAT_A4,
+            'format' => [80, 100],
+            'marginLeft' => 5,
+            'marginRight' => 5,
+            'marginTop' => 5,
+            'marginBottom' => 5,
+            'marginHeader' => 5,
+            'marginFooter' => 5,
+            // portrait orientation
+            'orientation' => Pdf::ORIENT_PORTRAIT,
+            // stream to browser inline
+            'destination' => Pdf::DEST_BROWSER,
+            // your html content input
+            'content' => $content,
+            // format content from your own css file if needed or use the
+            // enhanced bootstrap css built by Krajee for mPDF formatting 
+            'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
+            // any css to be embedded if required
+            'cssInline' => '.kv-heading-1{font-size:18px}',
+            // set mPDF properties on the fly
+            'options' => [
+                'title' => 'Billing',
+            ],
+            // call mPDF methods on the fly
+            'methods' => [
+                'SetHeader' => false,
+                'SetFooter' => false,
+            ]
+        ]);
+        $pdf->getApi()->SetJS('this.print();');
+
+        return $pdf->render();
     }
-    
-    public function actionPrintpdfa4($id, $depid){
-        
-        $dataProvider = Withdraw::find()->where(['withdraw_id'=>$id])->all();
-        $depModel = Deposits::find()->where(['id'=>$depid])->all();
-        $content = $this->renderPartial('printpdfA4',[
+
+    public function actionPrintpdfa4($id, $depid) {
+
+        $dataProvider = Withdraw::find()->where(['withdraw_id' => $id])->all();
+        $depModel = Deposits::find()->where(['id' => $depid])->all();
+        $content = $this->renderPartial('printpdfA4', [
             'id' => $id,
             'depModel' => $depModel,
             'dataProvider' => $dataProvider,
-            ]);
+        ]);
 
-                $pdf = new Pdf([
-                    // set to use core fonts only
-                    'mode' => Pdf::MODE_UTF8, //
-                    // A4 paper format
-                    //'format' => Pdf::FORMAT_A4,
-                    'format' => [210,148.5],
-                    'marginLeft' => 5,
-                    'marginRight' => 5,
-                    'marginTop' => 5,
-                    'marginBottom' => 5,
-                    'marginHeader' => 5,
-                    'marginFooter' => 5,
-                    // portrait orientation
-                    'orientation' => Pdf::ORIENT_PORTRAIT,
-                    // stream to browser inline
-                    'destination' => Pdf::DEST_BROWSER,
-                    // your html content input
-                    'content' => $content,
-                    
-                    // format content from your own css file if needed or use the
-                    // enhanced bootstrap css built by Krajee for mPDF formatting 
-                    'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
-                    // any css to be embedded if required
-                    'cssInline' => '.kv-heading-1{font-size:18px}',
-                    // set mPDF properties on the fly
-                    'options' => [
-                        'title' => 'Billing',
-                        ],
-                    // call mPDF methods on the fly
-                    'methods' => [
-                        'SetHeader' => false,
-                        'SetFooter' => false,
-                    ]
-                ]);
-                $pdf->getApi()->SetJS('this.print();');
-                
-                return $pdf->render();
+        $pdf = new Pdf([
+            // set to use core fonts only
+            'mode' => Pdf::MODE_UTF8, //
+            // A4 paper format
+            //'format' => Pdf::FORMAT_A4,
+            'format' => [210, 148.5],
+            'marginLeft' => 5,
+            'marginRight' => 5,
+            'marginTop' => 5,
+            'marginBottom' => 5,
+            'marginHeader' => 5,
+            'marginFooter' => 5,
+            // portrait orientation
+            'orientation' => Pdf::ORIENT_PORTRAIT,
+            // stream to browser inline
+            'destination' => Pdf::DEST_BROWSER,
+            // your html content input
+            'content' => $content,
+            // format content from your own css file if needed or use the
+            // enhanced bootstrap css built by Krajee for mPDF formatting 
+            'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
+            // any css to be embedded if required
+            'cssInline' => '.kv-heading-1{font-size:18px}',
+            // set mPDF properties on the fly
+            'options' => [
+                'title' => 'Billing',
+            ],
+            // call mPDF methods on the fly
+            'methods' => [
+                'SetHeader' => false,
+                'SetFooter' => false,
+            ]
+        ]);
+        $pdf->getApi()->SetJS('this.print();');
+
+        return $pdf->render();
     }
-    
-    public function actionPrintpdfdot($id, $depid){
-        
-        $dataProvider = Withdraw::find()->where(['withdraw_id'=>$id])->all();
-        $depModel = Deposits::find()->where(['id'=>$depid])->all();
-        $content = $this->renderPartial('printpdfDot',[
+
+    public function actionPrintpdfdot($id, $depid) {
+
+        $dataProvider = Withdraw::find()->where(['withdraw_id' => $id])->all();
+        $depModel = Deposits::find()->where(['id' => $depid])->all();
+        $content = $this->renderPartial('printpdfDot', [
             'id' => $id,
             'depModel' => $depModel,
             'dataProvider' => $dataProvider,
-            ]);
+        ]);
 
-                $pdf = new Pdf([
-                    // set to use core fonts only
-                    'mode' => Pdf::MODE_UTF8, //
-                    // A4 paper format
-                    //'format' => Pdf::FORMAT_A4,
-                    'format' => [205,140],
-                    'marginLeft' => 5,
-                    'marginRight' => 5,
-                    'marginTop' => 5,
-                    'marginBottom' => 5,
-                    'marginHeader' => 5,
-                    'marginFooter' => 5,
-                    // portrait orientation
-                    'orientation' => Pdf::ORIENT_PORTRAIT,
-                    // stream to browser inline
-                    'destination' => Pdf::DEST_BROWSER,
-                    // your html content input
-                    'content' => $content,
-                    
-                    // format content from your own css file if needed or use the
-                    // enhanced bootstrap css built by Krajee for mPDF formatting 
-                    'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
-                    // any css to be embedded if required
-                    'cssInline' => '.kv-heading-1{font-size:18px}',
-                    // set mPDF properties on the fly
-                    'options' => [
-                        'title' => 'Billing',
-                        ],
-                    // call mPDF methods on the fly
-                    'methods' => [
-                        'SetHeader' => false,
-                        'SetFooter' => false,
-                    ]
-                ]);
-                $pdf->getApi()->SetJS('this.print();');
-                
-                return $pdf->render();
+        $pdf = new Pdf([
+            // set to use core fonts only
+            'mode' => Pdf::MODE_UTF8, //
+            // A4 paper format
+            //'format' => Pdf::FORMAT_A4,
+            'format' => [205, 140],
+            'marginLeft' => 5,
+            'marginRight' => 5,
+            'marginTop' => 5,
+            'marginBottom' => 5,
+            'marginHeader' => 5,
+            'marginFooter' => 5,
+            // portrait orientation
+            'orientation' => Pdf::ORIENT_PORTRAIT,
+            // stream to browser inline
+            'destination' => Pdf::DEST_BROWSER,
+            // your html content input
+            'content' => $content,
+            // format content from your own css file if needed or use the
+            // enhanced bootstrap css built by Krajee for mPDF formatting 
+            'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
+            // any css to be embedded if required
+            'cssInline' => '.kv-heading-1{font-size:18px}',
+            // set mPDF properties on the fly
+            'options' => [
+                'title' => 'Billing',
+            ],
+            // call mPDF methods on the fly
+            'methods' => [
+                'SetHeader' => false,
+                'SetFooter' => false,
+            ]
+        ]);
+        $pdf->getApi()->SetJS('this.print();');
+
+        return $pdf->render();
     }
 
     /**

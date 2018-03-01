@@ -23,9 +23,8 @@ class DepositsController extends Controller {
     public $KEY_RUN = 'DEP';
     public $FIELD_NAME = 'id';
     public $TABLE_NAME = 'deposits';
-    
-    public  $Month,$Year,$CODE,$LastID,$Key,$last_id = "";		// เก็บค่าเดือน เช่น 04  date("m")
-    public $last_3_digit,$new_3_digit;
+    public $Month, $Year, $CODE, $LastID, $Key, $last_id = "";  // เก็บค่าเดือน เช่น 04  date("m")
+    public $last_3_digit, $new_3_digit;
 
     public function behaviors() {
         return [
@@ -56,7 +55,7 @@ class DepositsController extends Controller {
     public function actionIndex() {
         $searchModel = new SearchDeposits();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-      
+
         return $this->render('index', [
                     'searchModel' => $searchModel,
                     'dataProvider' => $dataProvider,
@@ -70,7 +69,7 @@ class DepositsController extends Controller {
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionView($id) {
-        
+
         $dataProvider = \app\models\SubDeposits::find()->where(['deposits_id' => $id])->all();
         $withdraw = \app\models\Withdraw::find()->where(['deposits_id' => $id, 'void' => 'false'])->all();
         return $this->render('view', [
@@ -95,169 +94,168 @@ class DepositsController extends Controller {
 
         return $this->render('create', [
                     'model' => $model,
-                    //'runningcode' => $runningcode,
+                        //'runningcode' => $runningcode,
         ]);
     }
-    
-    public function actionVoid($depid){
+
+    public function actionVoid($depid) {
         
     }
-    
-    public function actionViewpdf($id){        
-        
-        $depModel = Deposits::find()->where(['id'=>$id])->all();
-        $dataProvider = SubDeposits::find()->where(['deposits_id'=>$id])->all();
-        return $this->render('viewpdf',[
+
+    public function actionViewpdf($id) {
+
+        $depModel = Deposits::find()->where(['id' => $id])->all();
+        $dataProvider = SubDeposits::find()->where(['deposits_id' => $id])->all();
+        return $this->render('viewpdf', [
+                    'id' => $id,
+                    'depModel' => $depModel,
+                    'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionPrintpdf($id) {
+
+        $dataProvider = SubDeposits::find()->where(['deposits_id' => $id])->all();
+        $depModel = Deposits::find()->where(['id' => $id])->all();
+        $content = $this->renderPartial('printpdf', [
             'id' => $id,
             'depModel' => $depModel,
             'dataProvider' => $dataProvider,
-            ]);
-                
+        ]);
+
+        $pdf = new Pdf([
+            // set to use core fonts only
+            'mode' => Pdf::MODE_UTF8, //
+            // A4 paper format
+            //'format' => Pdf::FORMAT_A4,
+            //'format' => [210,148.5],
+            'format' => [80, 100],
+            'marginLeft' => 5,
+            'marginRight' => 5,
+            'marginTop' => 5,
+            'marginBottom' => 5,
+            'marginHeader' => 5,
+            'marginFooter' => 5,
+            // portrait orientation
+            'orientation' => Pdf::ORIENT_PORTRAIT,
+            // stream to browser inline
+            'destination' => Pdf::DEST_BROWSER,
+            // your html content input
+            'content' => $content,
+            // format content from your own css file if needed or use the
+            // enhanced bootstrap css built by Krajee for mPDF formatting 
+            'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
+            //'cssFile' => '@web/css/pdf.css',
+            // any css to be embedded if required
+            'cssInline' => '.kv-heading-1{font-size:18px}',
+            // set mPDF properties on the fly
+            'options' => ['title' => 'Billing'],
+            // call mPDF methods on the fly
+            'methods' => [
+                'SetHeader' => false,
+                'SetFooter' => false,
+            ]
+        ]);
+
+        $pdf->getApi()->SetJS('this.print();');
+
+        return $pdf->render();
     }
-    
-    public function actionPrintpdf($id){
-        
-        $dataProvider = SubDeposits::find()->where(['deposits_id'=>$id])->all();
-        $depModel = Deposits::find()->where(['id'=>$id])->all();
-        $content = $this->renderPartial('printpdf',[
+
+    public function actionPrintpdfa4($id) {
+
+        $dataProvider = SubDeposits::find()->where(['deposits_id' => $id])->all();
+        $depModel = Deposits::find()->where(['id' => $id])->all();
+        $content = $this->renderPartial('printpdfA4', [
             'id' => $id,
             'depModel' => $depModel,
             'dataProvider' => $dataProvider,
-            ]);
+        ]);
 
-                $pdf = new Pdf([
-                    // set to use core fonts only
-                    'mode' => Pdf::MODE_UTF8, //
-                    // A4 paper format
-                    //'format' => Pdf::FORMAT_A4,
-                    //'format' => [210,148.5],
-                    'format' => [80,100],
-                    'marginLeft' => 5,
-                    'marginRight' => 5,
-                    'marginTop' => 5,
-                    'marginBottom' => 5,
-                    'marginHeader' => 5,
-                    'marginFooter' => 5,
-                    // portrait orientation
-                    'orientation' => Pdf::ORIENT_PORTRAIT,
-                    // stream to browser inline
-                    'destination' => Pdf::DEST_BROWSER,
-                    // your html content input
-                    'content' => $content,
-                    // format content from your own css file if needed or use the
-                    // enhanced bootstrap css built by Krajee for mPDF formatting 
-                    'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
-                    //'cssFile' => '@web/css/pdf.css',
-                    // any css to be embedded if required
-                    'cssInline' => '.kv-heading-1{font-size:18px}',
-                    // set mPDF properties on the fly
-                    'options' => ['title' => 'Billing'],
-                    // call mPDF methods on the fly
-                    'methods' => [
-                        'SetHeader' => false,
-                        'SetFooter' => false,
-                    ]
-                ]);
-                
-                $pdf->getApi()->SetJS('this.print();');
+        $pdf = new Pdf([
+            // set to use core fonts only
+            'mode' => Pdf::MODE_UTF8, //
+            // A4 paper format
+            //'format' => Pdf::FORMAT_A4,
+            'format' => [210, 148.5],
+            'marginLeft' => 5,
+            'marginRight' => 5,
+            'marginTop' => 5,
+            'marginBottom' => 5,
+            'marginHeader' => 5,
+            'marginFooter' => 5,
+            // portrait orientation
+            'orientation' => Pdf::ORIENT_PORTRAIT,
+            // stream to browser inline
+            'destination' => Pdf::DEST_BROWSER,
+            // your html content input
+            'content' => $content,
+            // format content from your own css file if needed or use the
+            // enhanced bootstrap css built by Krajee for mPDF formatting 
+            'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
+            //'cssFile' => '@web/css/pdf.css',
+            // any css to be embedded if required
+            'cssInline' => '.kv-heading-1{font-size:18px}',
+            // set mPDF properties on the fly
+            'options' => ['title' => 'Billing'],
+            // call mPDF methods on the fly
+            'methods' => [
+                'SetHeader' => false,
+                'SetFooter' => false,
+            ]
+        ]);
 
-                return $pdf->render();
+        $pdf->getApi()->SetJS('this.print();');
+
+        return $pdf->render();
     }
-    
-    public function actionPrintpdfa4($id){
-        
-        $dataProvider = SubDeposits::find()->where(['deposits_id'=>$id])->all();
-        $depModel = Deposits::find()->where(['id'=>$id])->all();
-        $content = $this->renderPartial('printpdfA4',[
+
+    public function actionPrintpdfdot($id) {
+
+        $dataProvider = SubDeposits::find()->where(['deposits_id' => $id])->all();
+        $depModel = Deposits::find()->where(['id' => $id])->all();
+        $content = $this->renderPartial('printpdfDot', [
             'id' => $id,
             'depModel' => $depModel,
             'dataProvider' => $dataProvider,
-            ]);
+        ]);
 
-                $pdf = new Pdf([
-                    // set to use core fonts only
-                    'mode' => Pdf::MODE_UTF8, //
-                    // A4 paper format
-                    //'format' => Pdf::FORMAT_A4,
-                    'format' => [210,148.5],
-                    'marginLeft' => 5,
-                    'marginRight' => 5,
-                    'marginTop' => 5,
-                    'marginBottom' => 5,
-                    'marginHeader' => 5,
-                    'marginFooter' => 5,
-                    // portrait orientation
-                    'orientation' => Pdf::ORIENT_PORTRAIT,
-                    // stream to browser inline
-                    'destination' => Pdf::DEST_BROWSER,
-                    // your html content input
-                    'content' => $content,
-                    // format content from your own css file if needed or use the
-                    // enhanced bootstrap css built by Krajee for mPDF formatting 
-                    'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
-                    //'cssFile' => '@web/css/pdf.css',
-                    // any css to be embedded if required
-                    'cssInline' => '.kv-heading-1{font-size:18px}',
-                    // set mPDF properties on the fly
-                    'options' => ['title' => 'Billing'],
-                    // call mPDF methods on the fly
-                    'methods' => [
-                        'SetHeader' => false,
-                        'SetFooter' => false,
-                    ]
-                ]);
-                
-                $pdf->getApi()->SetJS('this.print();');
+        $pdf = new Pdf([
+            // set to use core fonts only
+            'mode' => Pdf::MODE_UTF8, //
+            // A4 paper format
+            //'format' => Pdf::FORMAT_A4,
+            'format' => [205, 140],
+            'marginLeft' => 5,
+            'marginRight' => 5,
+            'marginTop' => 2,
+            'marginBottom' => 5,
+            'marginHeader' => 5,
+            'marginFooter' => 5,
+            // portrait orientation
+            'orientation' => Pdf::ORIENT_PORTRAIT,
+            // stream to browser inline
+            'destination' => Pdf::DEST_BROWSER,
+            // your html content input
+            'content' => $content,
+            // format content from your own css file if needed or use the
+            // enhanced bootstrap css built by Krajee for mPDF formatting 
+            'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
+            //'cssFile' => '@web/css/pdf.css',
+            // any css to be embedded if required
+            'cssInline' => '.kv-heading-1{font-size:18px}',
+            // set mPDF properties on the fly
+            'options' => ['title' => 'Billing'],
+            // call mPDF methods on the fly
+            'methods' => [
+                'SetHeader' => false,
+                'SetFooter' => false,
+            ]
+        ]);
 
-                return $pdf->render();
-    }
-    
-    public function actionPrintpdfdot($id){
-        
-        $dataProvider = SubDeposits::find()->where(['deposits_id'=>$id])->all();
-        $depModel = Deposits::find()->where(['id'=>$id])->all();
-        $content = $this->renderPartial('printpdfDot',[
-            'id' => $id,
-            'depModel' => $depModel,
-            'dataProvider' => $dataProvider,
-            ]);
+        $pdf->getApi()->SetJS('this.print();');
 
-                $pdf = new Pdf([
-                    // set to use core fonts only
-                    'mode' => Pdf::MODE_UTF8, //
-                    // A4 paper format
-                    //'format' => Pdf::FORMAT_A4,
-                    'format' => [205,140],
-                    'marginLeft' => 5,
-                    'marginRight' => 5,
-                    'marginTop' => 2,
-                    'marginBottom' => 5,
-                    'marginHeader' => 5,
-                    'marginFooter' => 5,
-                    // portrait orientation
-                    'orientation' => Pdf::ORIENT_PORTRAIT,
-                    // stream to browser inline
-                    'destination' => Pdf::DEST_BROWSER,
-                    // your html content input
-                    'content' => $content,
-                    // format content from your own css file if needed or use the
-                    // enhanced bootstrap css built by Krajee for mPDF formatting 
-                    'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
-                    //'cssFile' => '@web/css/pdf.css',
-                    // any css to be embedded if required
-                    'cssInline' => '.kv-heading-1{font-size:18px}',
-                    // set mPDF properties on the fly
-                    'options' => ['title' => 'Billing'],
-                    // call mPDF methods on the fly
-                    'methods' => [
-                        'SetHeader' => false,
-                        'SetFooter' => false,
-                    ]
-                ]);
-                
-                $pdf->getApi()->SetJS('this.print();');
-
-                return $pdf->render();
+        return $pdf->render();
     }
 
     /**
@@ -287,14 +285,13 @@ class DepositsController extends Controller {
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionDelete($id) {
-        try{
-            if($this->findModel($id)->delete()){
+        try {
+            if ($this->findModel($id)->delete()) {
                 return $this->redirect(['index']);
             }
         } catch (Exception $ex) {
-
+            
         }
-        
     }
 
     /**
@@ -312,6 +309,16 @@ class DepositsController extends Controller {
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    
+   public function closedStatus($id) {
+        $depModel = Deposits::findOne($id);
+        $depModel->status = 'closed';
+        // Update status to closed
+        //Yii::$app->db->createCommand()->update('deposits', ['status' => 'closed'], ['id' => $model->deposits_id])->execute();
+        if($depModel->update()){
+            return true;
+        }else{
+            return FALSE;
+        }
+    }
 
 }
