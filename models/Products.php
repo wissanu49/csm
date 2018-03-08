@@ -34,7 +34,8 @@ class Products extends \yii\db\ActiveRecord
         return [
             [['name', 'price', 'units_id'], 'required'],
             [['name'], 'string'],
-            [['price', 'units_id'], 'integer'],
+            [['units_id'], 'integer'],
+            [['price'], 'double'],
             [['units_id'], 'exist', 'skipOnError' => true, 'targetClass' => Units::className(), 'targetAttribute' => ['units_id' => 'id']],
         ];
     }

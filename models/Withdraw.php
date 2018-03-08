@@ -31,10 +31,11 @@ class Withdraw extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['id', 'withdraw_id', 'date_withdraw', 'deposits_id', 'users_id', 'products_id', 'price'], 'required'],
-            [['id', 'products_id', 'users_id', 'price'], 'integer'],
+            [['id', 'products_id', 'users_id'], 'integer'],
             [['deposits_id'], 'string'],
             [['date_withdraw'], 'safe'],
             [['void'], 'string'],
+            [[ 'price'], 'double'],
             [['id'], 'unique'],
             [['products_id'], 'exist', 'skipOnError' => true, 'targetClass' => Products::className(), 'targetAttribute' => ['products_id' => 'id']],
             [['deposits_id'], 'exist', 'skipOnError' => true, 'targetClass' => Deposits::className(), 'targetAttribute' => ['deposits_id' => 'id']],
